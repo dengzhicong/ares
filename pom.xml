@@ -21,7 +21,6 @@
 	<modules>
 		<module>ares_utils</module>
 		<module>ares_core</module>
-		<module>ares_db</module>
 	</modules>
 
 	<dependencies>

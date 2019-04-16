@@ -11,22 +11,13 @@ import com.google.protobuf.Message;
  * 服务器和客户端,服务器和服务器直接数据传输的对象
  **/
 public class PbMessage implements IMessage {
-//	/**
-//	 * 包头大小
-//	 */
-//	public static final short	HDR_SIZE			= 14;
-//	/**
-//	 * 	包头标记
-//	 */
-//	public static final short	HEADER				= 0x71ab;
-//
-//	private short				header				= HEADER;	// 包头
 //	private short				len;							// 数据包长度
-//	private short				code;							// 协议号
-//	private long				playerId;						// 玩家ID
-//	private byte[]				bytes;							// 数据体
-//	private Message				message;						// Proto
-//
+//	private int					mid;							// 协议号
+//	private long				sessionId;						// sessionID(为随机数或玩家id，客户端没有该字段)
+//	private short				order;							// (客户端没有该字段)
+//	private short				encrypt;						// 是否加密(0:加密，1：未加密；inner没有加密字段)
+//	private byte[]				keys;							// AES公钥（此处用了ECC加密，客户端需要用公钥解密）
+//	private byte[]				bytes;							// 数据体(如果是加密，那么byte数组已经被AES加密了,需用AES公钥解密)
 
 	/**
 	 * 缓存proto对象,避免每次反射创建proto对象
@@ -34,11 +25,12 @@ public class PbMessage implements IMessage {
 	static Map<String, Message> map = new ConcurrentHashMap<>();
 
 	/**
-	 * 包头占用长度(short(2)+int(4)+long(8)+long(8)+int(4)=26->需要排除长度字段的字节)
+	 * 包头占用长度(len(short:2)+mid(int:4)+sessionId(long:8)+order(int:4)=18->需要排除长度字段的字节)
 	 */
-	public static final short INNER_HEAD_SIZE = 24;
+	public static final short INNER_HEAD_SIZE = 16;
 	/**
-	 * 包头占用长度{short(2)+int(4)+int(4)=10->需要排除长度字段的字节}
+	 * 包头占用长度{len(short:2)+mid(int:4)+encrypt(short:2)+keyLen(short:2)=10->需要排除长度字段的字节}<br>
+	 * keyLen：是公钥字节数组长度
 	 */
 	public static final short CLIENT_HEAD_SIZE = 8;
 

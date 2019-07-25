@@ -6,8 +6,8 @@ import java.util.function.Consumer;
 import javax.xml.ws.spi.http.HttpHandler;
 
 import com.ares.handler.HandlerEntity;
+import com.ares.handler.HttpHandlerEntity;
 import com.ares.handler.IHandler;
-import com.orange.handler.HttpHandlerEntity;
 
 /**
  * 脚本管理

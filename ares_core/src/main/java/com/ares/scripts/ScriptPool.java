@@ -27,10 +27,10 @@ import javax.xml.ws.spi.http.HttpHandler;
 
 import com.ares.file.FileUtil;
 import com.ares.handler.HandlerEntity;
+import com.ares.handler.HttpHandlerEntity;
 import com.ares.handler.IHandler;
 import com.ares.handler.TcpHandler;
 import com.ares.log.LogUtil;
-import com.orange.handler.HttpHandlerEntity;
 
 /**
  * 脚本加载管理容器

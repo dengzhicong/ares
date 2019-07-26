@@ -1,6 +1,6 @@
 package com.ares.actor;
 
-import com.ares.queue.IActorQueue;
+import com.ares.queue.IActionQueue;
 
 /**
  * 循环多次执行Actor
@@ -8,7 +8,7 @@ import com.ares.queue.IActorQueue;
  * @author admin
  *
  */
-public abstract class LoopActor extends DelayActor {
+public abstract class LoopAction extends DelayAction {
 	/**
 	 * 计数
 	 */
@@ -25,7 +25,7 @@ public abstract class LoopActor extends DelayActor {
 	 * @param delay 间隔多长时间执行一次（第一次执行会在首次延迟时到的时候执行）
 	 * @param count ：执行次数
 	 */
-	public LoopActor(IActorQueue queue, int delay, int count) {
+	public LoopAction(IActionQueue queue, int delay, int count) {
 		super(queue, delay);
 		this.count = count;
 		this.delay = delay;
@@ -38,7 +38,7 @@ public abstract class LoopActor extends DelayActor {
 	 * @param delay     ： 间隔多长时间执行一次（第一次执行会在首次延迟时到的时候执行）
 	 * @param count     ：执行次数
 	 */
-	public LoopActor(IActorQueue queue, long startTime, int delay, int count) {
+	public LoopAction(IActionQueue queue, long startTime, int delay, int count) {
 		super(queue, startTime, delay);
 		this.count = count;
 		this.delay = delay;

@@ -2,8 +2,8 @@ package com.ares.queue;
 
 import java.util.Queue;
 
-import com.ares.actor.Actor;
-import com.ares.actor.DelayActor;
+import com.ares.actor.Action;
+import com.ares.actor.DelayAction;
 
 /**
  * action 队列接口
@@ -11,14 +11,14 @@ import com.ares.actor.DelayActor;
  * @author Noah
  *
  */
-public interface IActorQueue {
+public interface IActionQueue {
 
 	/**
 	 * 添加延时执行任务
 	 * 
 	 * @param delayAction
 	 */
-	public void enDelayQueue(DelayActor delayAction);
+	public void enDelayQueue(DelayAction delayAction);
 
 	/**
 	 * 清空队列
@@ -30,21 +30,21 @@ public interface IActorQueue {
 	 * 
 	 * @return
 	 */
-	public Queue<Actor> getActionQueue();
+	public Queue<Action> getActionQueue();
 
 	/**
 	 * 入队
 	 * 
 	 * @param cmd
 	 */
-	public void enqueue(Actor cmd);
+	public void enqueue(Action cmd);
 
 	/**
 	 * 出队
 	 * 
 	 * @param cmd
 	 */
-	public void dequeue(Actor cmd);
+	public void dequeue(Action cmd);
 
 	/**
 	 * 是否已经停止

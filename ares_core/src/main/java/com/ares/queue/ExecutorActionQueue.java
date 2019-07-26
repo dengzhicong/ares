@@ -3,8 +3,8 @@ package com.ares.queue;
 import java.util.LinkedList;
 import java.util.Queue;
 
-import com.ares.actor.Actor;
-import com.ares.actor.DelayActor;
+import com.ares.actor.Action;
+import com.ares.actor.DelayAction;
 import com.ares.log.LogUtil;
 import com.ares.thread.IExecutor;
 
@@ -15,10 +15,10 @@ import com.ares.thread.IExecutor;
  *
  * @param <T>
  */
-public class ExecutorActorQueue<T extends Runnable> implements IActorQueue {
+public class ExecutorActionQueue implements IActionQueue {
 
 	/** 任务队列实体 */
-	private Queue<Actor> queue;
+	private Queue<Action> queue;
 	/** 执行器 */
 	protected IExecutor executor;
 	/** 队列名称 */
@@ -30,14 +30,16 @@ public class ExecutorActorQueue<T extends Runnable> implements IActorQueue {
 	 * @param executor         :执行器
 	 * @param queueName：队列前缀名称
 	 */
-	public ExecutorActorQueue(IExecutor executor, String queueName) {
+	public ExecutorActionQueue(IExecutor executor, String queueName) {
 		this.executor = executor;
-		this.queue = new LinkedList<Actor>();
+		this.queue = new LinkedList<Action>();
 		this.queueName = queueName;
+
+		ExecutorQueueManager.getInstance().addPool(queueName, this);
 	}
 
 	@Override
-	public void enDelayQueue(DelayActor delayAction) {
+	public void enDelayQueue(DelayAction delayAction) {
 		executor.executeDelayAction(delayAction);
 	}
 
@@ -49,12 +51,12 @@ public class ExecutorActorQueue<T extends Runnable> implements IActorQueue {
 	}
 
 	@Override
-	public Queue<Actor> getActionQueue() {
+	public Queue<Action> getActionQueue() {
 		return queue;
 	}
 
 	@Override
-	public void enqueue(Actor actor) {
+	public void enqueue(Action actor) {
 		if (clearQueueFlag == true) {
 			return;
 		}
@@ -74,13 +76,13 @@ public class ExecutorActorQueue<T extends Runnable> implements IActorQueue {
 	}
 
 	@Override
-	public void dequeue(Actor actor) {
-		Actor nextCmdTask = null;
+	public void dequeue(Action actor) {
+		Action nextCmdTask = null;
 		synchronized (queue) {
 			if (queue.size() == 0) {
 				LogUtil.error(queueName + "queue.size() is 0.");
 			}
-			Actor temp = queue.remove();
+			Action temp = queue.remove();
 			if (temp != actor) {
 				LogUtil.error(queueName + "queue error. temp " + temp.toString() + ", cmd : " + actor.toString());
 			}

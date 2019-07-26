@@ -1,12 +1,12 @@
 package com.ares.thread;
 
-import com.ares.actor.Actor;
-import com.ares.actor.DelayActor;
+import com.ares.actor.Action;
+import com.ares.actor.DelayAction;
 
 /**
  * 通用执行actor队列的线程池
  */
-public class CommonExecutor extends BaseExecutor<Actor> implements IExecutor {
+public class CommonExecutor extends BaseExecutor<Action> implements IExecutor {
 	/**
 	 * 延迟/定时 检测线程
 	 */
@@ -23,7 +23,7 @@ public class CommonExecutor extends BaseExecutor<Actor> implements IExecutor {
 	 * 
 	 * @param delayActor
 	 */
-	public void executeDelayAction(DelayActor delayActor) {
+	public void executeDelayAction(DelayAction delayActor) {
 		delayCheckThread.addActor(delayActor);
 	}
 }

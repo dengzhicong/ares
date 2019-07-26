@@ -7,7 +7,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.ares.actor.Actor;
+import com.ares.actor.Action;
 
 /**
  * 基础线程构造器
@@ -56,7 +56,7 @@ public class BaseExecutor<T extends Runnable> implements IExecutor {
 	 * 执行
 	 */
 	@Override
-	public void execute(Actor actor) {
+	public void execute(Action actor) {
 		pool.execute(actor);
 	}
 

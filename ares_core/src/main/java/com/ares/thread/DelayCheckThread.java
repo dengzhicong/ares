@@ -3,7 +3,7 @@ package com.ares.thread;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.ares.actor.DelayActor;
+import com.ares.actor.DelayAction;
 import com.ares.log.LogUtil;
 
 /**
@@ -18,14 +18,14 @@ public class DelayCheckThread extends Thread {
 
 	/** 线程锁 */
 	private Object lock = new Object(); // 线程锁
-	private List<DelayActor> queue;
-	private List<DelayActor> execQueue;
+	private List<DelayAction> queue;
+	private List<DelayAction> execQueue;
 	private volatile boolean isRunning;
 
 	public DelayCheckThread(String prefix) {
 		super(prefix + "_DelayCheckThread");
-		queue = new ArrayList<DelayActor>();
-		execQueue = new ArrayList<DelayActor>();
+		queue = new ArrayList<DelayAction>();
+		execQueue = new ArrayList<DelayAction>();
 		isRunning = true;
 		setPriority(Thread.MAX_PRIORITY); // 给予高优先级
 	}
@@ -80,7 +80,7 @@ public class DelayCheckThread extends Thread {
 	 **/
 	private int execActors() {
 		int executeCount = 0;
-		for (DelayActor delayActor : execQueue) {
+		for (DelayAction delayActor : execQueue) {
 			try {
 				long begin = System.currentTimeMillis();
 				if (delayActor == null) {
@@ -110,7 +110,7 @@ public class DelayCheckThread extends Thread {
 	 * 
 	 * @param delayAction
 	 */
-	public void addActor(DelayActor delayAction) {
+	public void addActor(DelayAction delayAction) {
 		synchronized (lock) {
 			queue.add(delayAction);
 			lock.notifyAll();

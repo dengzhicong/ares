@@ -1,23 +1,23 @@
 package com.ares.actor;
 
 import com.ares.log.LogUtil;
-import com.ares.queue.IActorQueue;
+import com.ares.queue.IActionQueue;
 
 /**
  * 运行的基本单位
  */
-public abstract class Actor implements Runnable {
+public abstract class Action implements Runnable {
 
 	/**
 	 * 队列线程池
 	 */
-	private IActorQueue queue;
+	private IActionQueue queue;
 	/**
 	 * 创建时间
 	 */
 	protected long createTime;
 
-	public Actor(IActorQueue queue) {
+	public Action(IActionQueue queue) {
 		this.queue = queue;
 		this.createTime = System.currentTimeMillis();
 	}
@@ -43,7 +43,7 @@ public abstract class Actor implements Runnable {
 		}
 	}
 
-	public IActorQueue getActorQueue() {
+	public IActionQueue getActorQueue() {
 		return queue;
 	}
 

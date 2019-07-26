@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 基于key-value的缓存工具
+ * 基于key-不同类型value的缓存工具
  * @author admin
  *
  */

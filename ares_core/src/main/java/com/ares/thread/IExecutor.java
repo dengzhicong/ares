@@ -1,7 +1,7 @@
 package com.ares.thread;
 
-import com.ares.actor.Actor;
-import com.ares.actor.DelayActor;
+import com.ares.actor.Action;
+import com.ares.actor.DelayAction;
 
 /**
  * 执行器接口定义
@@ -17,7 +17,7 @@ public interface IExecutor {
 	 * 
 	 * @param actor
 	 */
-	public void execute(Actor actor);
+	public void execute(Action actor);
 
 	/**
 	 * 停止所有线程
@@ -30,6 +30,6 @@ public interface IExecutor {
 	 * 
 	 * @param delayAction
 	 */
-	public default void executeDelayAction(DelayActor delayAction) {
+	public default void executeDelayAction(DelayAction delayAction) {
 	};
 }

@@ -1,6 +1,6 @@
 package com.ares.actor;
 
-import com.ares.queue.IActorQueue;
+import com.ares.queue.IActionQueue;
 
 /**
  * 延迟执行actor
@@ -8,7 +8,7 @@ import com.ares.queue.IActorQueue;
  * @author admin
  *
  */
-public abstract class DelayActor extends Actor {
+public abstract class DelayAction extends Action {
 	/**
 	 * 执行时间点
 	 */
@@ -18,7 +18,7 @@ public abstract class DelayActor extends Actor {
 	 */
 	protected int delay;
 
-	public DelayActor(IActorQueue queue, int delay) {
+	public DelayAction(IActionQueue queue, int delay) {
 		super(queue);
 		this.execTime = System.currentTimeMillis() + delay;
 		this.delay = delay;
@@ -30,7 +30,7 @@ public abstract class DelayActor extends Actor {
 	 * @param startTime : 开始时间
 	 * @param delay     : 推迟时间（单位：毫秒）
 	 */
-	public DelayActor(IActorQueue queue, long startTime, int delay) {
+	public DelayAction(IActionQueue queue, long startTime, int delay) {
 		super(queue);
 		execTime = startTime + delay;
 	}

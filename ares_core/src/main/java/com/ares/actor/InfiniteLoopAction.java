@@ -1,6 +1,6 @@
 package com.ares.actor;
 
-import com.ares.queue.IActorQueue;
+import com.ares.queue.IActionQueue;
 
 /**
  * 无限循环
@@ -8,9 +8,9 @@ import com.ares.queue.IActorQueue;
  * @author admin
  *
  */
-public abstract class InfiniteLoopActor extends DelayActor {
+public abstract class InfiniteLoopAction extends DelayAction {
 
-	public InfiniteLoopActor(IActorQueue queue, int delay) {
+	public InfiniteLoopAction(IActionQueue queue, int delay) {
 		super(queue, delay);
 	}
 

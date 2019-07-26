@@ -1,10 +1,9 @@
 package com.ares.queue;
 
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.ares.actor.Action;
+import com.ares.action.Action;
 import com.ares.thread.CommonExecutor;
 
 /**
@@ -20,33 +19,29 @@ public class ExecutorQueueManager {
 		return manager;
 	}
 
+	public static final String DEFAULT_ACTION_QUEUE = "default_action_queue";
+	/** CPU核 */
 	private int cpuNum;
-
-	/**
-	 * CPU核
-	 */
-	public static final int CPU_NUM = Math.max(Runtime.getRuntime().availableProcessors() * 2, 8);
-
-	/**
-	 * action执行器
-	 */
-	public static final CommonExecutor commonExecutor;
+	/** action执行器 */
+	private CommonExecutor commonExecutor;
 
 	static {
-		int cpuNum=Math.max(Runtime.getRuntime().availableProcessors() * 2, 8);
-		
+		int cpuNum = Math.max(Runtime.getRuntime().availableProcessors() * 2, 8);
+
 		int corePoolSize = cpuNum;
 		int maxPoolSize = cpuNum + 32;
 		int keepAliveTime = 5;
 		int cacheSize = 1024;
-		commonExecutor = new CommonExecutor(corePoolSize, maxPoolSize, keepAliveTime, cacheSize, "WORD_ACTOR_EXECUTOR");
-	}
+		CommonExecutor commonExecutor = new CommonExecutor(corePoolSize, maxPoolSize, keepAliveTime, cacheSize,
+				"word_actor_executor");
 
-	/**
-	 * 默认Action执行队列 1:执行系统排队action 2:执行系统延迟/定时action 3:执行系统循环执行action
-	 */
-	public static final ExecutorActionQueue defaultActionQueue = new ExecutorActionQueue(commonExecutor,
-			"common_actor_queue");
+		getInstance().setCpuNum(cpuNum);
+		getInstance().setCommonExecutor(commonExecutor);
+
+		// 默认Action执行队列 1:执行系统排队action 2:执行系统延迟/定时action 3:执行系统循环执行action
+		ExecutorActionQueue defaultActionQueue = new ExecutorActionQueue(commonExecutor, "default_actor_queue");
+		getInstance().addPool(DEFAULT_ACTION_QUEUE, defaultActionQueue);
+	}
 
 	/** key:队列对应的唯一标识 */
 	public Map<String, ExecutorActionQueue> pool = new ConcurrentHashMap<>();
@@ -82,4 +77,13 @@ public class ExecutorQueueManager {
 	public void setCpuNum(int cpuNum) {
 		this.cpuNum = cpuNum;
 	}
+
+	public CommonExecutor getCommonExecutor() {
+		return commonExecutor;
+	}
+
+	public void setCommonExecutor(CommonExecutor commonExecutor) {
+		this.commonExecutor = commonExecutor;
+	}
+
 }

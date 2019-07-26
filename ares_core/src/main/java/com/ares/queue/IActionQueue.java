@@ -2,8 +2,8 @@ package com.ares.queue;
 
 import java.util.Queue;
 
-import com.ares.actor.Action;
-import com.ares.actor.DelayAction;
+import com.ares.action.Action;
+import com.ares.action.DelayAction;
 
 /**
  * action 队列接口

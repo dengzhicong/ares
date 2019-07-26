@@ -1,7 +1,7 @@
 package com.ares.thread;
 
-import com.ares.actor.Action;
-import com.ares.actor.DelayAction;
+import com.ares.action.Action;
+import com.ares.action.DelayAction;
 
 /**
  * 执行器接口定义

@@ -7,7 +7,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.ares.actor.Action;
+import com.ares.action.Action;
 
 /**
  * 基础线程构造器

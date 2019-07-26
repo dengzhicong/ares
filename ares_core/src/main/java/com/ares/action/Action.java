@@ -1,4 +1,4 @@
-package com.ares.actor;
+package com.ares.action;
 
 import com.ares.log.LogUtil;
 import com.ares.queue.IActionQueue;

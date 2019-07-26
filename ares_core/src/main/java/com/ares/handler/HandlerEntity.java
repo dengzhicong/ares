@@ -1,9 +1,10 @@
 package com.ares.handler;
 
-import com.google.protobuf.Message;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+
+import com.ares.thread.ThreadType;
+import com.google.protobuf.Message;
 
 /**
  * 消息处理注解
@@ -23,6 +24,13 @@ public @interface HandlerEntity {
 	 * @return 描述
 	 */
 	String desc() default "";
+
+	/**
+	 * 调用的线程
+	 * 
+	 * @return
+	 */
+	ThreadType thread() default ThreadType.SYSTEM;
 
 	/**
 	 * tcp 请求的消息类

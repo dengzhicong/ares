@@ -1,44 +1,70 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.ares.time;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.Clock;
+import java.time.DayOfWeek;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.Period;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
-import java.util.Calendar;
+import java.time.temporal.TemporalAdjusters;
 import java.util.Date;
-import java.util.TimeZone;
 
 /**
  * 服务器系统时间工具
  * 
- * @author HW-fanjaiwei
- *
+ * 使用jdk8时间API<br>
+ * <br>
+ * 
+ * {@link Instant} : 与Date类似<br>
+ * {@link LocalDate} : 不带时间的日期<br>
+ * {@link LocalTime} : 不带日期的时间<br>
+ * {@link LocalDateTime} : 带日期的时间的类<br>
+ * {@link ZoneId} : 时区<br>
+ * {@link ZonedDateTime} : 一个带时区的完整时间<br>
+ * {@link Instant} : unix时间,代表时间戳,如2018-01-13T02:20:13.592Z<br>
+ * {@link Clock} : 获取某个时区下当前的瞬时时间,日期或时间<br>
+ * {@link Duration} : 并表示一个绝对的精度跨度,使用毫秒为单位<br>
+ * {@link Period} : 这个类与Duration小童的概念,但以熟悉的单位表示,如年,月,周<br>
+ * {@link DateTimeFormatter} : 格式化输出<br>
+ * {@link TemporalAdjusters} : 获得指定日期时间,如当月的第一天,今年的最后一天<br>
  */
 public class TimeUtils {
-
 	/**
-	 * 跳过的时间（秒）
+	 * 时间单位
 	 */
-	private static long skipSeconds = 0;
-
-	// 用ThreadLocal处理SimpleDateFormat非线程安全的问题/////////////////////////
-	private static final ThreadLocal<DateFormat> sdfNoSecond = new ThreadLocal<DateFormat>() {
-		@Override
-		protected DateFormat initialValue() {
-			return new SimpleDateFormat("yyyy-MM-dd HH:mm");
-		}
-	};
-
-	public static DateFormat getSdfNoSecond() {
-		return sdfNoSecond.get();
+	public interface Unit {
+		int YEAR = 1;
+		int MONTH = 2;
+		int WEEK = 3;
+		int DAY = 4;
+		int HOURS = 5;
+		int MINUTES = 6;
+		int SECONDS = 7;
+		int MILLIS = 8;
 	}
-	////////////////////////////////////////////////////////////////////////////
+
+//	public static void main(String[] args) {
+//		Date date1 = format2Date("2019-07-30 23:10:43", "yyyy-MM-dd HH:mm:ss");
+//		Date date2 = format2Date("2019-08-01 23:11:43", "yyyy-MM-dd HH:mm:ss");
+//		System.out.println(getBetweenDateTime(date1.getTime(), date2.getTime(), Unit.DAY));
+//		System.out.println(getBetweenDateTime(date1.getTime(), date2.getTime(), Unit.MONTH));
+//		System.out.println(getBetweenDateTime(date1.getTime(), date2.getTime(), Unit.YEAR));
+//		System.out.println(getBetweenDateTime(date1.getTime(), date2.getTime(), Unit.WEEK));
+//		System.out.println(getBetweenDateTime(date1.getTime(), date2.getTime(), Unit.HOURS));
+//		System.out.println(getBetweenDateTime(date1.getTime(), date2.getTime(), Unit.MINUTES));
+//		System.out.println(getBetweenDateTime(date1.getTime(), date2.getTime(), Unit.SECONDS));
+//		System.out.println(getBetweenDateTime(date1.getTime(), date2.getTime(), Unit.MILLIS));
+//		System.out.println(getDayOfYear(date1.getTime()));
+//		System.out.println(isSameWeek(date1, date2));
+//		System.out.println(format2string(new Date()));
+//	}
 
 	/**
 	 * 获取当天剩余秒数
@@ -46,7 +72,7 @@ public class TimeUtils {
 	 * @return
 	 */
 	public static long getTodayRemainSeconds() {
-		LocalDateTime midnight = LocalDateTime.now().plusDays(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
+		LocalDateTime midnight = LocalDateTime.of(LocalDate.now(), LocalTime.MAX);
 		return ChronoUnit.SECONDS.between(LocalDateTime.now(), midnight);
 	}
 
@@ -55,57 +81,23 @@ public class TimeUtils {
 	 * 
 	 * @return
 	 */
-	public static long currentTime() {
-		return System.currentTimeMillis() + skipSeconds * 1000;
-	}
-
-	public static long getSkipSeconds() {
-		return skipSeconds;
-	}
-
-	public static void setSkipSeconds(int skipSeconds) {
-		TimeUtils.skipSeconds = skipSeconds;
-	}
-
-	/**
-	 * 获取当天时间字符串
-	 * 
-	 * @return 如：20180612
-	 */
-	public static String getTodayTime() {
-		Calendar cal = Calendar.getInstance();
-		int year = cal.get(Calendar.YEAR);// 获取年份
-		int month = cal.get(Calendar.MONTH) + 1;// 获取月份
-		int day = cal.get(Calendar.DATE);// 获取日
-		StringBuilder sb = new StringBuilder();
-		sb.append(year);
-		if (month < 10) {
-			sb.append("0" + month);
-		} else {
-			sb.append(month);
-		}
-		if (day < 10) {
-			sb.append("0" + day);
-		} else {
-			sb.append(day);
-		}
-		return sb.toString();
+	public static long getCurrentTime() {
+		return System.currentTimeMillis();
 	}
 
 	/**
 	 * 获取当天0时0分0秒 到现在流逝的时间
 	 *
-	 * @return
+	 * @return 毫秒
 	 */
 	public static long getTodayPassMillis() {
-		Calendar instance = Calendar.getInstance();
-		instance.setTimeInMillis(currentTime());
-		int hour = instance.get(Calendar.HOUR_OF_DAY);
-		int min = instance.get(Calendar.MINUTE);
-		int second = instance.get(Calendar.SECOND);
-		int millis = instance.get(Calendar.MILLISECOND);
+		LocalTime localTime = LocalTime.now();
+		int hour = localTime.getHour();
+		int minute = localTime.getMinute();
+		int second = localTime.getSecond();
+		int nano = localTime.getNano();
 
-		return hour * 3600000 + min * 60000 + second * 1000 + millis;
+		return hour * 3600000 + minute * 60000 + second * 1000 + nano / 1000000;
 	}
 
 	/**
@@ -114,20 +106,9 @@ public class TimeUtils {
 	 * @return
 	 */
 	public static long getTodayBeginTime() {
-		long curTime = currentTime();
-		Calendar instance = Calendar.getInstance();
-		instance.setTimeInMillis(curTime);
-		instance.set(Calendar.MILLISECOND, 0);
-		int year = instance.get(Calendar.YEAR);
-		int month = instance.get(Calendar.MONTH);
-		int date = instance.get(Calendar.DATE);
-		instance.set(year, month, date, 0, 0, 0);
-		return instance.getTimeInMillis();
-	}
+		LocalDateTime localDateTime = LocalDateTime.of(LocalDate.now(), LocalTime.MIN);
 
-	public static Date getTodayBeginTime2() {
-		long todayBegin = getTodayBeginTime();
-		return new Date(todayBegin);
+		return localDateTimeToInstant(localDateTime).toEpochMilli();
 	}
 
 	/**
@@ -135,22 +116,12 @@ public class TimeUtils {
 	 * 
 	 * @return
 	 */
-//	public static Date getNextBeginTime() {
-//		return new DateTime(getTodayBeginTime()).plusDays(1).toDate();
-//	}
+	public static Date getNextBeginTime() {
+		LocalDate localDate = LocalDate.now();
+		LocalDate plusDays = localDate.plusDays(1);
 
-	/**
-	 * 取得当前日期所在周的第一天
-	 *
-	 * @return
-	 */
-	public static long getFirstDayOfWeek() {
-		long curTime = currentTime();
-		Calendar instance = Calendar.getInstance();
-		instance.setTimeInMillis(curTime);
-		instance.setFirstDayOfWeek(Calendar.MONDAY);
-		instance.set(Calendar.DAY_OF_WEEK, instance.getFirstDayOfWeek());
-		return instance.getTimeInMillis();
+		LocalDateTime nextDay = LocalDateTime.of(plusDays, LocalTime.MIN);
+		return localDateTimeToDate(nextDay);
 	}
 
 	/**
@@ -159,82 +130,70 @@ public class TimeUtils {
 	 * @return
 	 */
 	public static long getCurWeekBeginTime() {
-		long curTime = currentTime();
-		Calendar instance = Calendar.getInstance();
-		instance.setTimeInMillis(curTime);
-		instance.setFirstDayOfWeek(Calendar.MONDAY);
-		instance.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
-		instance.set(Calendar.HOUR_OF_DAY, 0);
-		instance.set(Calendar.MINUTE, 0);
-		instance.set(Calendar.SECOND, 0);
-		instance.set(Calendar.MILLISECOND, 0);
-		return instance.getTimeInMillis();
+		LocalDate localDate = LocalDate.now().with(DayOfWeek.MONDAY);
+		return localDateToDate(localDate).getTime();
 	}
 
-	// 获取本月开始时间
+	/**
+	 * 获取本月开始时间
+	 * 
+	 * @return
+	 */
 	public static long getMonthBeginTime() {
-		long curTime = currentTime();
-		Calendar instance = Calendar.getInstance();
-		instance.setTimeInMillis(curTime);
-		instance.set(Calendar.MILLISECOND, 0);
-		int year = instance.get(Calendar.YEAR);
-		int month = instance.get(Calendar.MONTH);
-		instance.set(year, month, 1, 0, 0, 0);
-		return instance.getTimeInMillis();
+		LocalDate today = LocalDate.now();
+
+		LocalDate firstDayOfMonth = today.with(TemporalAdjusters.firstDayOfMonth());
+		return localDateToDate(firstDayOfMonth).getTime();
 	}
 
-	// 获取下个月开始时间
+	/**
+	 * 获取下个月开始时间
+	 * 
+	 * @return
+	 */
 	public static long getNextMonthBeginTime() {
-		long curTime = currentTime();
-		Calendar instance = Calendar.getInstance();
-		instance.setTimeInMillis(curTime);
-		instance.set(Calendar.MILLISECOND, 0);
-		int year = instance.get(Calendar.YEAR);
-		int month = instance.get(Calendar.MONTH);
-		if (month >= 11) {
-			year += 1;
-			month = 0;
-		} else {
-			month += 1;
-		}
-		instance.set(year, month, 1, 0, 0, 0);
-		return instance.getTimeInMillis();
-	}
+		LocalDate today = LocalDate.now();
 
-	// 获得格式化的时间值
-	public static String NowToString() {
-		long now = currentTime();
-		Date date = new Date(now);
-		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		return simpleDateFormat.format(date);
-	}
-
-	// 获得格式化的时间值
-	public static String NowToString(String df) {
-		long now = currentTime();
-		Date date = new Date(now);
-		SimpleDateFormat simpleDateFormat = new SimpleDateFormat(df);
-		return simpleDateFormat.format(date);
-	}
-
-	// 获得格式化的时间值
-	public static String NowTGToString() {
-		long now = currentTime();
-		Date date = new Date(now);
-		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
-		return simpleDateFormat.format(date);
+		// 默认获取下月最后一天的开始时间
+		LocalDate plusMonths = today.plusMonths(1);
+		// 获取下月第一天开始时间
+		LocalDate _plusMonths = plusMonths.with(TemporalAdjusters.firstDayOfMonth());
+		return localDateToDate(_plusMonths).getTime();
 	}
 
 	/**
 	 * 获得格式化的时间值 yyyy-MM-dd HH:mm:ss
 	 * 
-	 * @param time
+	 * @param time 可为Date或Long
 	 * @return
 	 */
-	public static String format2string(long time) {
-		Date date = new Date(time);
-		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		return simpleDateFormat.format(date);
+	public static String format2string(Object time) {
+		LocalDateTime localDateTime = convertLocalDateTime(time);
+
+		if (localDateTime == null) {
+			return "null";
+		}
+
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+		return localDateTime.format(formatter);
+	}
+
+	/**
+	 * 获得格式化的时间值
+	 *
+	 * @param time   可为Date或Long
+	 * @param format "yyyy-MM-dd HH:mm:ss"
+	 * @return
+	 */
+	public static String format2string(Object time, String format) {
+		LocalDateTime localDateTime = convertLocalDateTime(time);
+
+		if (localDateTime == null) {
+			return "null";
+		}
+
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
+		return localDateTime.format(formatter);
 	}
 
 	/**
@@ -244,24 +203,13 @@ public class TimeUtils {
 	 * @param format "yyyy-MM-dd HH:mm:ss"
 	 * @return
 	 */
-	public static String format2string(long time, String format) {
-		Date date = new Date(time);
-		SimpleDateFormat simpleDateFormat = new SimpleDateFormat(format);
-		return simpleDateFormat.format(date);
-	}
-
-	/**
-	 * 获得格式化的时间值
-	 *
-	 * @param time
-	 * @param format "yyyy-MM-dd HH:mm:ss"
-	 * @return
-	 */
-	public static Date format2string(String date, String format) {
+	public static Date format2Date(String date, String format) {
 		try {
-			SimpleDateFormat simpleDateFormat = new SimpleDateFormat(format);
-			return simpleDateFormat.parse(date);
-		} catch (ParseException e) {
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
+			LocalDateTime parseDate = LocalDateTime.parse(date, formatter);
+
+			return localDateTimeToDate(parseDate);
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return null;
@@ -280,363 +228,278 @@ public class TimeUtils {
 	}
 
 	/**
+	 * 判断两个时间中间所差的日期时间(天数,周数,月数,年数,小时,分钟,秒,毫秒)
+	 * 
+	 * @param time1 可为Date或Long
+	 * @param time2 可为Date或Long
+	 * @param unit  {@link Unit}
+	 * @return
+	 */
+	public static long getBetweenDateTime(Object time1, Object time2, int unit) {
+		LocalDateTime localDate1 = convertLocalDateTime(time1);
+		LocalDateTime localDate2 = convertLocalDateTime(time2);
+
+		switch (unit) {
+		case Unit.DAY:
+			return localDate1.until(localDate2, ChronoUnit.DAYS);
+		case Unit.MONTH:
+			return localDate1.until(localDate2, ChronoUnit.MONTHS);
+		case Unit.YEAR:
+			return localDate1.until(localDate2, ChronoUnit.YEARS);
+		case Unit.WEEK:
+			return localDate1.until(localDate2, ChronoUnit.WEEKS);
+		case Unit.HOURS:
+			return localDate1.until(localDate2, ChronoUnit.HOURS);
+		case Unit.MINUTES:
+			return localDate1.until(localDate2, ChronoUnit.MINUTES);
+		case Unit.SECONDS:
+			return localDate1.until(localDate2, ChronoUnit.SECONDS);
+		case Unit.MILLIS:
+			return localDate1.until(localDate2, ChronoUnit.MILLIS);
+		default:
+			return -1;
+		}
+	}
+
+	/**
 	 * 判断两个时间是否在同一天
 	 *
 	 * @param time
 	 * @param time2
 	 * @return
 	 */
-	public static boolean isSameDay(long time, long time2) {
-		Calendar instance = Calendar.getInstance();
-		instance.setTimeInMillis(time);
-		int d1 = instance.get(Calendar.DAY_OF_YEAR);
-		int y1 = instance.get(Calendar.YEAR);
-		instance.setTimeInMillis(time2);
-		int d2 = instance.get(Calendar.DAY_OF_YEAR);
-		int y2 = instance.get(Calendar.YEAR);
-		return d1 == d2 && y1 == y2;
-	}
-
-	/**
-	 * 获取1970至今的天数 （计数会在在每天指定的小时+1，用来判断每天X点清数据之类的）
-	 *
-	 * @param hour 每天第X个小时+1
-	 * @return
-	 */
-	public static int getCurDay(int hour) {
-		TimeZone zone = TimeZone.getDefault(); // 默认时区
-		long s = currentTime() / 1000 - hour * 3600;
-		if (zone.getRawOffset() != 0) {
-			s = s + zone.getRawOffset() / 1000;
-		}
-		s = s / 86400; // 86400 = 24 * 60 * 60 (一天时间的秒数)
-		return (int) s;
+	public static boolean isSameDay(Object time1, Object time2) {
+		return getBetweenDateTime(time1, time2, Unit.DAY) == 0;
 	}
 
 	/**
 	 * 指定时间的年份
 	 *
-	 * @param time
+	 * @param time 可为Date或Long
 	 * @return
 	 */
-	public static int getYear(long time) {
-		Calendar instance = Calendar.getInstance();
-		instance.setTimeInMillis(time);
-		return instance.get(Calendar.YEAR);
+	public static int getYear(Object time) {
+		LocalDate localDate = convertLocalDate(time);
+		if (localDate == null) {
+			return -1;
+		}
+		return localDate.getYear();
 	}
 
 	/**
-	 * 指定时间的月份,0-11
+	 * 指定时间的月份
 	 *
-	 * @param time
+	 * @param time 可为Date或Long
 	 * @return
 	 */
-	public static int getMonth(long time) {
-		Calendar instance = Calendar.getInstance();
-		instance.setTimeInMillis(time);
-		return instance.get(Calendar.MONTH);
+	public static int getMonth(Object time) {
+		LocalDate localDate = convertLocalDate(time);
+		if (localDate == null) {
+			return -1;
+		}
+		return localDate.getMonthValue();
 	}
 
 	/**
 	 * 获取日期(一个月内的第几天)
 	 *
-	 * @param time
+	 * @param time 可为Date或Long
 	 * @return
 	 */
-	public static int getDayOfMonth(long time) {
-		Calendar instance = Calendar.getInstance();
-		instance.setTimeInMillis(time);
-		return instance.get(Calendar.DAY_OF_MONTH);
+	public static int getDayOfMonth(Object time) {
+		LocalDate localDate = convertLocalDate(time);
+		if (localDate == null) {
+			return -1;
+		}
+		return localDate.getDayOfMonth();
 	}
 
 	/**
 	 * 获取小时
 	 *
-	 * @param time
+	 * @param time 可为Date或Long
 	 * @return
 	 */
-	public static int getDayOfHour(long time) {
-		Calendar instance = Calendar.getInstance();
-		instance.setTimeInMillis(time);
-		return instance.get(Calendar.HOUR_OF_DAY);
+	public static int getDayOfHour(Object time) {
+		LocalDateTime localDateTime = convertLocalDateTime(time);
+		if (localDateTime == null) {
+			return -1;
+		}
+
+		return localDateTime.getHour();
 	}
 
 	/**
 	 * 获取分钟
 	 *
-	 * @param time
+	 * @param time 可为Date或Long
 	 * @return
 	 */
-	public static int getDayOfMin(long time) {
-		Calendar instance = Calendar.getInstance();
-		instance.setTimeInMillis(time);
-		return instance.get(Calendar.MINUTE);
+	public static int getDayOfMin(Object time) {
+		LocalDateTime localDateTime = convertLocalDateTime(time);
+		if (localDateTime == null) {
+			return -1;
+		}
+
+		return localDateTime.getMinute();
 	}
 
 	/**
 	 * 获取秒
 	 *
-	 * @param time
+	 * @param time 可为Date或Long
 	 * @return
 	 */
-	public static int getDayOfSecond(long time) {
-		Calendar instance = Calendar.getInstance();
-		instance.setTimeInMillis(time);
-		return instance.get(Calendar.SECOND);
+	public static int getDayOfSecond(Object time) {
+		LocalDateTime localDateTime = convertLocalDateTime(time);
+		if (localDateTime == null) {
+			return -1;
+		}
+
+		return localDateTime.getSecond();
 	}
 
 	/**
 	 * 获取指定时间 是一月内的第几周
 	 *
-	 * @param time
+	 * @param time 可为Date或Long
 	 * @return
 	 */
-	public static int getDayOfWeekInMonth(long time) {
-		Calendar instance = Calendar.getInstance();
-		instance.setTimeInMillis(time);
-		return instance.get(Calendar.DAY_OF_WEEK_IN_MONTH);
+	public static int getDayOfWeekInMonth(Object time) {
+		LocalDate localDate = convertLocalDate(time);
+		if (localDate == null) {
+			return -1;
+		}
+
+		return localDate.get(ChronoField.ALIGNED_WEEK_OF_MONTH);
 	}
 
 	/**
 	 * 获取星期几
 	 *
-	 * @param time
+	 * @param time 可为Date或Long
 	 * @return
 	 */
-	public static int getDayOfWeek(long time) {
-		Calendar instance = Calendar.getInstance();
-		instance.setTimeInMillis(time);
-		int i = instance.get(Calendar.DAY_OF_WEEK);
-		if (i == 1) {
-			return 7;
-		} else {
-			i -= 1;
+	public static int getDayOfWeek(Object time) {
+		LocalDate localDate = convertLocalDate(time);
+		if (localDate == null) {
+			return -1;
 		}
-		return i;
+
+		return localDate.getDayOfWeek().getValue();
 	}
 
 	/**
 	 * 获取一年内的第几天
-	 *
-	 * @param time
+	 * 
+	 * @param time 可为Date或Long
 	 * @return
 	 */
-	public static int getDayOfYear(long time) {
-		Calendar instance = Calendar.getInstance();
-		instance.setTimeInMillis(time);
-		return instance.get(Calendar.DAY_OF_YEAR);
-	}
-
-	/**
-	 * 字符串转日期("yyyy-MM-dd HH:mm:ss");
-	 *
-	 * @param date
-	 * @return
-	 * @throws java.text.ParseException
-	 */
-	public static Date getDateByString(String date) throws ParseException {
-		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		return simpleDateFormat.parse(date);
-	}
-
-	/**
-	 * 判断两个时间中间所差天数
-	 *
-	 * @param time1 大的时间
-	 * @param time2 小的时间
-	 * @return
-	 */
-	public static int getBetweenDays(long time1, long time2) {
-		Calendar instance1 = Calendar.getInstance();
-		instance1.setTimeInMillis(time1);
-		instance1.set(Calendar.HOUR_OF_DAY, 0);
-		instance1.set(Calendar.MINUTE, 0);
-		instance1.set(Calendar.SECOND, 0);
-		instance1.set(Calendar.MILLISECOND, 0);
-		Calendar instance2 = Calendar.getInstance();
-		instance2.setTimeInMillis(time2);
-		instance2.set(Calendar.HOUR_OF_DAY, 0);
-		instance2.set(Calendar.MINUTE, 0);
-		instance2.set(Calendar.SECOND, 0);
-		instance2.set(Calendar.MILLISECOND, 0);
-		return (int) ((instance1.getTimeInMillis() - instance2.getTimeInMillis()) / (24 * 60 * 60 * 1000));
-	}
-
-	/**
-	 * 判断两个时间中间所差分钟
-	 *
-	 * @param time1
-	 * @param time2
-	 * @return
-	 */
-	public static long getBetweenMinutes(long time1, long time2) {
-		Calendar instance1 = Calendar.getInstance();
-		instance1.setTimeInMillis(time1);
-		instance1.set(Calendar.HOUR_OF_DAY, 0);
-		instance1.set(Calendar.MINUTE, 0);
-		instance1.set(Calendar.SECOND, 0);
-		instance1.set(Calendar.MILLISECOND, 0);
-		Calendar instance2 = Calendar.getInstance();
-		instance2.setTimeInMillis(time2);
-		instance2.set(Calendar.HOUR_OF_DAY, 0);
-		instance2.set(Calendar.MINUTE, 0);
-		instance2.set(Calendar.SECOND, 0);
-		instance2.set(Calendar.MILLISECOND, 0);
-		return (instance1.getTimeInMillis() - instance2.getTimeInMillis()) / (60 * 1000);
-	}
-
-	/**
-	 * 获取1970至今的时间, 1获取秒，2 分钟，3小时，4天数,5周数
-	 *
-	 * @param x
-	 * @param time
-	 * @return
-	 */
-	public static long GetCurTimeInMin(int x, long time) {
-		TimeZone zone = TimeZone.getDefault(); // 默认时区
-		long s = time / 1000;
-		if (zone.getRawOffset() != 0) {
-			s = s + zone.getRawOffset() / 1000;
-		}
-		switch (x) {
-		case 1:
-			break;
-		case 2:
-			s = s / 60;
-			break;
-		case 3:
-			s = s / 3600;
-			break;
-		case 4:
-			s = s / 86400;
-			break;
-		case 5:
-			s = s / 86400 + 3;// 补足天数，星期1到7算一周
-			s = s / 7;
-			break;
-		default:
-			break;
-		}
-		return s;
-	}
-
-	/**
-	 * 指定小时与分，秒，计算与当前时间的差值， 不跨天
-	 *
-	 * @param hour
-	 * @param min
-	 * @param sec
-	 * @return
-	 */
-	public static int getDecNowToTime(int hour, int min, int sec) {
-		long now = currentTime();
-		Calendar instance1 = Calendar.getInstance();
-		instance1.setTimeInMillis(now);
-		instance1.set(Calendar.HOUR_OF_DAY, hour);
-		instance1.set(Calendar.MINUTE, min);
-		instance1.set(Calendar.SECOND, sec);
-		instance1.set(Calendar.MILLISECOND, 0);
-		int res = (int) ((instance1.getTimeInMillis() - now) / 1000);
-		return res > 0 ? res : 0;
-	}
-
-	/**
-	 * 指定小时与分，秒，返回当天指定的小时分秒的当前时间值
-	 *
-	 * @param hour
-	 * @param min
-	 * @param sec
-	 * @return
-	 */
-	public static long getToTime(int hour, int min, int sec) {
-		long now = currentTime();
-		Calendar instance1 = Calendar.getInstance();
-		instance1.setTimeInMillis(now);
-		instance1.set(Calendar.HOUR_OF_DAY, hour);
-		instance1.set(Calendar.MINUTE, min);
-		instance1.set(Calendar.SECOND, sec);
-		instance1.set(Calendar.MILLISECOND, 0);
-		return instance1.getTimeInMillis();
-	}
-
-	/**
-	 * 返回离下一个星期几还剩的秒值
-	 *
-	 * @param weekday
-	 * @param hour
-	 * @param min
-	 * @param sec
-	 * @return
-	 */
-	public static int getDecNowToTime(int weekday, int hour, int min, int sec) {
-		long now = currentTime();
-
-		int wk = getDayOfWeek(now);
-		Calendar instance1 = Calendar.getInstance();
-		instance1.setTimeInMillis(now);
-
-		if (wk < weekday) {
-			// 本周
-			instance1.add(Calendar.DAY_OF_MONTH, weekday - wk);
-		} else if (wk > weekday) {
-			// 下一周
-			instance1.add(Calendar.DAY_OF_MONTH, 7 - wk + weekday);
-		} else {
-			// 当天
-			int time = getDecNowToTime(hour, min, sec);
-			if (time == 0)// 等于0 表示下一周去了
-			{
-				instance1.add(Calendar.DAY_OF_MONTH, 7 - wk + weekday);
-			} else {
-				return time;// 不是就返回当前时间
-			}
+	public static int getDayOfYear(Object time) {
+		LocalDate localDate = convertLocalDate(time);
+		if (localDate == null) {
+			return -1;
 		}
 
-		instance1.set(Calendar.HOUR_OF_DAY, hour);
-		instance1.set(Calendar.MINUTE, min);
-		instance1.set(Calendar.SECOND, sec);
-		instance1.set(Calendar.MILLISECOND, 0);
-		int res = (int) ((instance1.getTimeInMillis() - now) / 1000);
-		return res > 0 ? res : 0;
+		return localDate.get(ChronoField.DAY_OF_YEAR);
 	}
 
 	/**
 	 * 判断两个时间是否为一周
 	 * 
-	 * @param time1
-	 * @param time2
+	 * @param time1 可为Date或Long
+	 * @param time2 可为Date或Long
 	 * @return
 	 */
-	public static boolean isSameWeek(long time1, long time2) {
-		Date d1 = new Date(time1);
-		Date d2 = new Date(time2);
-
-		Calendar cal1 = Calendar.getInstance();
-		Calendar cal2 = Calendar.getInstance();
-		cal1.setFirstDayOfWeek(Calendar.MONDAY);// 西方周日为一周的第一天，咱得将周一设为一周第一天
-		cal2.setFirstDayOfWeek(Calendar.MONDAY);
-		cal1.setTime(d1);
-		cal2.setTime(d2);
-		int subYear = cal1.get(Calendar.YEAR) - cal2.get(Calendar.YEAR);
-		if (subYear == 0)// subYear==0,说明是同一年
-		{
-			if (cal1.get(Calendar.WEEK_OF_YEAR) == cal2.get(Calendar.WEEK_OF_YEAR))
-				return true;
-		} else if (subYear == 1 && cal2.get(Calendar.MONTH) == 11) // subYear==1,说明cal比cal2大一年;java的一月用"0"标识，那么12月用"11"
-		{
-			if (cal1.get(Calendar.WEEK_OF_YEAR) == cal2.get(Calendar.WEEK_OF_YEAR))
-				return true;
-		} else if (subYear == -1 && cal1.get(Calendar.MONTH) == 11)// subYear==-1,说明cal比cal2小一年
-		{
-			if (cal1.get(Calendar.WEEK_OF_YEAR) == cal2.get(Calendar.WEEK_OF_YEAR))
-				return true;
-		}
-		return false;
+	public static boolean isSameWeek(Object time1, Object time2) {
+		return getBetweenDateTime(time1, time2, Unit.WEEK) == 0;
 	}
 
-	public static void main(String[] args) {
-		long remainTime = TimeUtils.getTodayRemainSeconds();
-		System.out.println("remainTime:" + remainTime);
+	/**
+	 * 将localDateTime转为Instant
+	 */
+	public static Instant localDateTimeToInstant(LocalDateTime localDateTime) {
+		return localDateTime.atZone(ZoneId.systemDefault()).toInstant();
+	}
+
+	/**
+	 * 将localDate转为Instant
+	 */
+	public static Instant localDateToInstant(LocalDate localDate) {
+		return localDate.atStartOfDay(ZoneId.systemDefault()).toInstant();
+	}
+
+	/**
+	 * 将localDateTime转为Date
+	 */
+	public static Date localDateTimeToDate(LocalDateTime localDateTime) {
+		return Date.from(localDateTimeToInstant(localDateTime));
+	}
+
+	/**
+	 * 将Date转为localDateTime
+	 */
+	public static LocalDateTime dateToLocalDateTime(Date date) {
+		return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+	}
+
+	/**
+	 * 将localDate转为Date
+	 */
+	public static Date localDateToDate(LocalDate localDate) {
+		return Date.from(localDateToInstant(localDate));
+	}
+
+	/**
+	 * 将Date转为LocalDate
+	 */
+	public static LocalDate dateToLocalDate(Date date) {
+		return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+	}
+
+	/**
+	 * 将Date转为LocalTime
+	 */
+	public static LocalTime dateToLocalTime(Date date) {
+		return date.toInstant().atZone(ZoneId.systemDefault()).toLocalTime();
+	}
+
+	/**
+	 * 将time转换成LocalDate
+	 * 
+	 * @param time
+	 * @return
+	 */
+	private static LocalDate convertLocalDate(Object time) {
+		LocalDate localDate = null;
+		if (time instanceof Date) {
+			Date date = (Date) time;
+			localDate = dateToLocalDate(date);
+		} else if (time instanceof Long) {
+			long timestamp = (long) time;
+			localDate = dateToLocalDate(new Date(timestamp));
+		}
+		return localDate;
+	}
+
+	/**
+	 * 将time转换成LocalDateTime
+	 * 
+	 * @param time
+	 * @return
+	 */
+	private static LocalDateTime convertLocalDateTime(Object time) {
+		LocalDateTime localDateTime = null;
+
+		if (time instanceof Date) {
+			Date date = (Date) time;
+			localDateTime = dateToLocalDateTime(date);
+		} else if (time instanceof Long) {
+			long timestamp = (long) time;
+			Instant instant = Instant.ofEpochMilli(timestamp);
+			localDateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
+		}
+		return localDateTime;
 	}
 
 }

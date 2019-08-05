@@ -2,7 +2,7 @@ package com.ares.handler;
 
 import java.util.Map;
 
-import com.ares.json.JSONUtil;
+import com.ares.json.JsonUtils;
 
 /**
  * http请求
@@ -28,7 +28,7 @@ public abstract class HttpHandler {
 	 * @return
 	 */
 	protected String writeToWeb(int statu, Object description) {
-		return JSONUtil.getJSONString(new HttpResult(statu, description));
+		return JsonUtils.toJSONString(new HttpResult(statu, description));
 	}
 
 }
